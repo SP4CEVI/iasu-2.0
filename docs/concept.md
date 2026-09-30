@@ -1318,14 +1318,11 @@ app/
 │   ├── Dockerfile
 │   └── ...
 ├── db/
-│   ├── migrations/
-│   └── seeds/
+│   └── ...
 ├── android/
 │   └── ...
 └── docs/
-    ├── architecture.md
-    ├── legal/
-    └── instructions/
+│   └── ...
 ```
 
 **Ветки:**
@@ -1361,7 +1358,7 @@ docs(152fz): обновить форму согласия
 - Секреты: ключи, пароли, строки подключения.
 
 **Что коммитить обязательно:**
-- `docker-compose.yml` — один на всех.
+- `docker-compose.yml` — один на всех (в сервисе db подставляется image: postgres... или image: mysql...).
 - `.env.example` — с пустыми значениями и комментариями.
 - `README.md` — инструкция по запуску.
 
@@ -1378,24 +1375,24 @@ docs(152fz): обновить форму согласия
 
 **Принцип.** Чужие сервисы — в Docker. Свой код — нативно в IDE, но подключается к контейнерным сервисам. Это даёт быстрый старт, breakpoints из коробки и одинаковые версии СУБД у всей команды.
 
-**Один `docker-compose.yml` в корне репозитория.** Описывает все сервисы: `postgres`, `api`, `admin`. Роль запускает только те, что ей нужны, — Docker сам поднимет зависимости через `depends_on`.
+**Один `docker-compose.yml` в корне репозитория.** Описывает все сервисы: `db`, `api`, `admin`. Роль запускает только те, что ей нужны, — Docker сам поднимет зависимости через `depends_on`. В конфигурации `db` подставляется та СУБД, что выбрана на хостинге (PostgreSQL или MySQL).
 
 **Команды запуска по ролям:**
 
 | Роль | Команда | Что поднимается |
 |---|---|---|
-| DB + Admin API | `docker compose up postgres` | Только БД |
-| Backend Core | `docker compose up postgres` | БД, API запускает нативно |
-| Frontend | `docker compose up postgres api` | БД и API, админку запускает нативно |
-| Android Core | `docker compose up postgres api` | БД и API |
-| Android UI | `docker compose up postgres api` | То же |
-| Документация / QA | `docker compose up postgres api admin` | Всё целиком для проверки |
+| DB + Admin API | `docker compose up db` | Только БД |
+| Backend Core | `docker compose up db` | БД, API запускает нативно |
+| Frontend | `docker compose up db api` | БД и API, админку запускает нативно |
+| Android Core | `docker compose up db api` | БД и API |
+| Android UI | `docker compose up db api` | То же |
+| Документация / QA | `docker compose up db api admin` | Всё целиком для проверки |
 
 **Как запускать свой код нативно:**
 
-- **Backend Core:** запускает `uvicorn`/`flask`/`gunicorn` локально, в `.env` указывает `DATABASE_URL=...localhost:5432...`. Контейнер `postgres` пробрасывает порт 5432 наружу.
-- **Frontend:** запускает `npm run dev`/`vite` локально, в переменных окружения указывает `API_URL=http://localhost:8000`. Контейнер `api` (если запущен) пробрасывает 8000.
-- **Android:** запускает приложение в Android Studio, `BASE_URL=http://10.0.2.2:8000` (эмулятор) или `http://<ваш-IP>:8000` (устройство в сети).
+- **Backend Core:** запускает сервер приложения локально, в `.env` указывает строку подключения к БД через `localhost` и порт, который проброшен из контейнера `db` наружу. Конкретный порт и формат строки зависят от выбранной СУБД.
+- **Frontend:** запускает dev-сервер локально, в переменных окружения указывает `API_URL=http://localhost:8000`. Контейнер `api` (если запущен) пробрасывает порт 8000 наружу.
+- **Android:** запускает приложение в Android Studio, `BASE_URL` указывает на `http://10.0.2.2:8000` (эмулятор) или `http://<ваш-IP>:8000` (устройство в сети).
 
 **Личные настройки.** Если нужно переопределить что-то только для себя, создаётся `docker-compose.override.yml` в корне. Он в `.gitignore` и не коммитится.
 
