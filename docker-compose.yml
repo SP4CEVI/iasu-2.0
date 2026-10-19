@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-attendance}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-attendance}
+      POSTGRES_DB: ${POSTGRES_DB:-attendance}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # DB is reachable as host `db` inside the compose network.
+    # Uncomment to expose locally if the port is free: "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-attendance} -d ${POSTGRES_DB:-attendance}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:4
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://attendance:attendance@db:5432/attendance}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-use-long-random-string}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-480}
+      ADMIN_DEFAULT_LOGIN: ${ADMIN_DEFAULT_LOGIN:-admin}
+      ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8000}
+      APK_DOWNLOAD_URL: ${APK_DOWNLOAD_URL:-/apk/attendance-placeholder.apk}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

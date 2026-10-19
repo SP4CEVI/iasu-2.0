@@ -1,0 +1,15 @@
+.env
+docker-compose.override.yml
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+backend/scripts/.device_state.json
+frontend/node_modules/
+frontend/dist/
+*.egg-info/
+.pytest_cache/
+.idea/
+.vscode/
+pgdata/
+1.txt
