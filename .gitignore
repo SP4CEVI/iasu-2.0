@@ -216,3 +216,30 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#------------------- NFC Reader --------------------
+# Встроенные файлы IDE (Android Studio / IntelliJ)
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Скомпилированные файлы классов
+*.class
+
+# Логи и временные файлы
+*.log
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Файлы окружения (если вдруг появятся)
+.env
+#-------------------------------------------------
